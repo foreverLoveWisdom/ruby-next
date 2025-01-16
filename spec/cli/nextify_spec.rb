@@ -132,10 +132,10 @@ describe "ruby-next nextify" do
   it "generates one version if --rewrite is provided" do
     run_ruby_next(
       "nextify #{File.join(__dir__, "dummy")} --proposed " \
-      "--rewrite=endless-range --rewrite=pattern-matching"
+      "--rewrite=endless-range --rewrite=pattern-matching --rewrite=method-reference"
     ) do |_status, _output, err|
       File.exist?(File.join(__dir__, "dummy", ".rbnext", "match_pattern.rb")).should equal true
-      File.exist?(File.join(__dir__, "dummy", ".rbnext", "method_reference.rb")).should equal false
+      File.exist?(File.join(__dir__, "dummy", ".rbnext", "method_reference.rb")).should equal true
       File.exist?(File.join(__dir__, "dummy", ".rbnext", "transpile_me.rb")).should equal true
       File.exist?(File.join(__dir__, "dummy", ".rbnext", "endless_pattern.rb")).should equal true
       File.exist?(File.join(__dir__, "dummy", ".rbnext", "namespaced", "endless_nameless.rb")).should equal true
@@ -157,12 +157,12 @@ describe "ruby-next nextify" do
   it "generates one version if --rewrite is provided with rewriter from edge along with --edge option" do
     run_ruby_next(
       "nextify #{File.join(__dir__, "dummy")} " \
-      "--rewrite=endless-method --edge",
+      "--rewrite=endless-method --rewrite=method-reference --edge",
       env: {"RUBY_NEXT_EDGE" => "0", "RUBY_NEXT_PROPOSED" => "1"}
     ) do |_status, _output, err|
       File.exist?(File.join(__dir__, "dummy", ".rbnext", "namespaced", "pattern_matching.rb")).should equal true
       File.exist?(File.join(__dir__, "dummy", ".rbnext", "match_pattern.rb")).should equal false
-      File.exist?(File.join(__dir__, "dummy", ".rbnext", "method_reference.rb")).should equal false
+      File.exist?(File.join(__dir__, "dummy", ".rbnext", "method_reference.rb")).should equal true
       File.exist?(File.join(__dir__, "dummy", ".rbnext", "transpile_me.rb")).should equal false
       File.exist?(File.join(__dir__, "dummy", ".rbnext", "endless_pattern.rb")).should equal false
       File.exist?(File.join(__dir__, "dummy", ".rbnext", "namespaced", "endless_nameless.rb")).should equal false
@@ -303,8 +303,8 @@ describe "ruby-next nextify" do
       "nextify --list-rewriters",
       env: {"RUBY_NEXT_PROPOSED" => "0", "RUBY_NEXT_EDGE" => "0"}
     ) do |_status, output, err|
-      output.should include('args-forward ("obj = Object.new; def obj.foo(...) super(...); end")')
-      output.should include('args-forward-leading ("obj = Object.new; def obj.foo(...) super(1, ...); end")')
+      output.should include('args-forward ("Module.new { def foo(...) super(...); end }")')
+      output.should include('args-forward-leading ("Module.new { def foo(...) super(1, ...); end }")')
       output.should include('numbered-params ("proc { _1 }.call(1)")')
       output.should include('pattern-matching ("case 0; in 0; true; else; 1; end")')
       output.should include('pattern-matching-find-pattern ("case 0; in [*,0,*]; true; else; 1; end")')
